@@ -2,13 +2,14 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import (JWTManager, create_access_token,
                                 get_jwt_claims, jwt_required)
+from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+from core import app, jwt
+from models import User
+from flask_login import login_user
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
 
-app.config['JWT_SECRET_KEY'] = 'please-change-me'
-
-jwt = JWTManager(app)
-CORS(app)
 
 # should get the user from a db or something else
 users_passwords = {'admin': 'admin', 'user': 'user'}
@@ -47,14 +48,20 @@ def login():
     if not password:
         return jsonify({'msg': 'Password is missing'}), 400
 
-    user_password = users_passwords.get(username)
+    _user = User.get_by_username(username)
+    if _user is not None and _user.check_password(password):
+        login_user(_user)
+        access_token = create_access_token(identity=username)
+        return jsonify({'access_token': access_token}), 200
 
-    if not user_password or password != user_password:
-        return jsonify({'msg': 'Bad username or password'}), 401
-
-    access_token = create_access_token(identity=username)
-
-    return jsonify({'access_token': access_token}), 200
+    # user_password = users_passwords.get(username)
+    #
+    # if not user_password or password != user_password:
+    #     return jsonify({'msg': 'Bad username or password'}), 401
+    #
+    # access_token = create_access_token(identity=username)
+    #
+    # return jsonify({'access_token': access_token}), 200
 
 
 @app.route('/api/protected', methods=['GET'])
