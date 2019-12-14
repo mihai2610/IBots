@@ -57,10 +57,10 @@ def login():
     if _user is None:
         return jsonify({'msg': 'Bad username or password'}), 401
 
-    # if _user is not None and _user.check_password(password):
-    login_user(_user)
-    access_token = create_access_token(identity=username)
-    return jsonify({'access_token': access_token}), 200
+    if _user is not None and _user.check_password(password):
+        login_user(_user)
+        access_token = create_access_token(identity=username)
+        return jsonify({'access_token': access_token}), 200
 
     # user_password = users_passwords.get(username)
     #
