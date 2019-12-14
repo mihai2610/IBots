@@ -1,19 +1,23 @@
+from typing import Dict
+
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 from flask_jwt_extended import (JWTManager, create_access_token,
                                 get_jwt_claims, jwt_required)
 from flask_sqlalchemy import SQLAlchemy
 
-from core import app, jwt
+from core import app
 from models import User
 from flask_login import login_user
 import os
+from flask_cors import cross_origin, CORS
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+jwt = JWTManager(app)
+cors = CORS(app)
 
 # should get the user from a db or something else
 users_passwords = {'admin': 'admin', 'user': 'user'}
-users_claims = {
+users_claims: Dict[str, Dict[str, str]] = {
     'admin': {
         'username': 'admin',
         'email': 'admin@admin.org',
@@ -33,6 +37,7 @@ def add_claims_to_access_token(identity):
 
 
 @app.route('/api/login', methods=['POST'])
+@cross_origin()
 def login():
     login_json = request.get_json()
 
@@ -49,10 +54,13 @@ def login():
         return jsonify({'msg': 'Password is missing'}), 400
 
     _user = User.get_by_username(username)
-    if _user is not None and _user.check_password(password):
-        login_user(_user)
-        access_token = create_access_token(identity=username)
-        return jsonify({'access_token': access_token}), 200
+    if _user is None:
+        return jsonify({'msg': 'Bad username or password'}), 401
+
+    # if _user is not None and _user.check_password(password):
+    login_user(_user)
+    access_token = create_access_token(identity=username)
+    return jsonify({'access_token': access_token}), 200
 
     # user_password = users_passwords.get(username)
     #
@@ -65,6 +73,7 @@ def login():
 
 
 @app.route('/api/protected', methods=['GET'])
+@cross_origin()
 @jwt_required
 def protected():
     claims = get_jwt_claims()
@@ -76,4 +85,4 @@ def protected():
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(debug=True, host='0.0.0.0')
+    app.run()
