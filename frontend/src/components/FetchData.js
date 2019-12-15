@@ -41,7 +41,7 @@ export class FetchData extends Component {
           loading: false
         })
       )
-      .catch(() => this.props.logout());
+      .catch((e) => console.log(e));
   };
 
 
@@ -60,7 +60,7 @@ export class FetchData extends Component {
             <tr key={ticker.id}>
               <td>{ticker.name}</td>
               <td>{ticker.description}</td>
-              <button className="btn btn-outline-primary" onClick={() => { this.setState({selectedTicker: ticker})}}> Buy </button>
+              <button className="btn btn-outline-primary" onClick={() => { this.setState({selectedTicker: ticker})}}> Trade </button>
             </tr>
           )}
         </tbody>
@@ -77,8 +77,8 @@ export class FetchData extends Component {
     }
     return (
       <div>
-        <h1 id="tabelLabel" >Weather forecast</h1>
-        <p>This component demonstrates fetching data from the server.</p>
+        <h1 id="tabelLabel" >Stock trading</h1>
+        <p>Pick a stock to trade</p>
         {contents}
       </div>
     );
