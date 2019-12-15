@@ -1,8 +1,7 @@
 from core import db
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import UserMixin
-from sqlalchemy import desc, event
-
+from sqlalchemy import desc, event, Enum
 
 ROLES_USERS = db.Table('roles_users',
                        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
@@ -11,6 +10,47 @@ ROLES_USERS = db.Table('roles_users',
 ORDERS_USERS = db.Table('orders_users',
                         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
                         db.Column('order_id', db.Integer(), db.ForeignKey('order.id')))
+
+PORTFOLIO_TICKERS = db.Table('portfolio_tickers',
+                             db.Column('portfolio_id', db.Integer(), db.ForeignKey('portfolio.id')),
+                             db.Column('ticker_id', db.Integer(), db.ForeignKey('ticker.id')),
+                             db.Column('quantity', db.Integer())
+                             )
+
+import enum
+
+
+class OrderStatus(enum.Enum):
+    pending = 1
+    submitted = 2
+    filled = 3
+    cancelled = 4
+
+class OrderType(enum.Enum):
+    market = 1
+    limit = 2
+
+
+class Portfolio(db.Model):
+    """
+    Defines the Portfolio model
+    """
+    id = db.Column(db.Integer(), primary_key=True)
+    totalvalue = db.Column(db.Float())
+    description = db.Column(db.String(255))
+
+    def __repr__(self):
+        return "<Portfolio '{}'>".format(self.name)
+
+    def __str__(self):
+        return self.id
+
+    def __eq__(self, other):
+        return (self.id == other or
+                self.id == getattr(other, 'id', None))
+
+    def __hash__(self):
+        return hash(self.id)
 
 
 class User(db.Model, UserMixin):
@@ -24,7 +64,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(120))
     roles = db.relationship('Role', secondary=ROLES_USERS,
                             backref=db.backref('users', lazy='dynamic'))
-    orders = db.relationship('Ticker', secondary=ORDERS_USERS,
+    orders = db.relationship('Order', secondary=ORDERS_USERS,
                              backref=db.backref('users', lazy='dynamic'))
     profile = db.relationship('Profile', backref='user', lazy='dynamic')
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
@@ -97,19 +137,20 @@ class Profile(db.Model):
     option1 = db.Column(db.Integer())
 
 
+
+
 class Order(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     ticker = db.Column(db.Integer, db.ForeignKey('ticker.id'))
-    cost = db.Column(db.Integer)
+    price = db.Column(db.Float())
+    status = db.Column(Enum(OrderStatus))
+    type = db.Column(Enum(OrderType))
 
 
 class Ticker(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
-
-
-
 
 
 @event.listens_for(Role.__table__, 'after_create')
@@ -135,3 +176,16 @@ def get_default_role(*args, **kwargs):  # pylint: disable=unused-argument
     return Role.query.filter(Role.name == 'User').first_or_404()
 
 
+
+@event.listens_for(Ticker.__table__, 'after_create')
+def insert_initial_values(*args, **kwargs):  # pylint: disable=unused-argument
+    """
+    Ensures the 3 basic roles required are created
+    :rtype: object
+    """
+    from sentalyzer.assets import  TICKERS
+
+    for k,v in TICKERS.items():
+        db.session.add(Ticker(name=k, description=v))
+
+    db.session.commit()
