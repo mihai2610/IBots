@@ -1,11 +1,19 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
+
+interface Ticker {
+  id: number,
+  name: string,
+  description: string
+}
 
 export class FetchData extends Component {
   static displayName = FetchData.name;
 
   constructor(props) {
     super(props);
-    this.state = { forecasts: [], loading: true };
+    this.state = { forecasts: [], loading: true, selectedTicker: undefined };
   }
 
   componentDidMount() {
@@ -36,20 +44,23 @@ export class FetchData extends Component {
       .catch(() => this.props.logout());
   };
 
-  static renderForecastsTable(forecasts) {
+
+
+  renderForecastsTable(tickers) {
     return (
       <table className='table table-striped' aria-labelledby="tabelLabel">
         <thead>
           <tr>
-            <th>Temp. (C)</th>
-            <th>Summary</th>
+            <th>Name</th>
+            <th>Description</th>
           </tr>
         </thead>
         <tbody>
-          {forecasts.map(forecast =>
-            <tr key={forecast.date}>
-              <td>{forecast.temperatureC}</td>
-              <td>{forecast.summary}</td>
+          {tickers.map(ticker =>
+            <tr key={ticker.id}>
+              <td>{ticker.name}</td>
+              <td>{ticker.description}</td>
+              <button className="btn btn-outline-primary" onClick={() => { this.setState({selectedTicker: ticker})}}> Buy </button>
             </tr>
           )}
         </tbody>
@@ -60,8 +71,10 @@ export class FetchData extends Component {
   render() {
     let contents = this.state.loading
       ? <p><em>Loading...</em></p>
-      : FetchData.renderForecastsTable(this.state.forecasts);
-
+      : this.renderForecastsTable(this.state.forecasts);
+    if(this.state.selectedTicker) {
+        return <Redirect to={'/ticker/'+this.state.selectedTicker.id}  />
+    }
     return (
       <div>
         <h1 id="tabelLabel" >Weather forecast</h1>
