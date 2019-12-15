@@ -1,46 +1,18 @@
 import React from 'react';
 import withAuth from './withAuth';
+import { Route } from 'react-router';
+import {Layout} from './components/Layout';
+import {Home} from './components/Home';
+import {FetchData} from './components/FetchData';
 
 class Protected extends React.Component {
-  state = {
-    data: []
-  };
-
-  fetchData = () => {
-    fetch('http://localhost:5000/api/protected', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${window.localStorage.accessToken}`
-      }
-    })
-      .then(response => {
-        if (response.status !== 200) {
-          throw new Error('Access denied');
-        }
-        return response.json();
-      })
-      .then(json =>
-        this.setState({
-          data: json.data
-        })
-      )
-      .catch(() => this.props.logout());
-  };
   render() {
     return (
-      <div>
-        <h1>Protected</h1>
-        <p>{JSON.stringify(this.props.claims)}</p>
-        <button onClick={this.props.logout}>Logout</button>
-        <button onClick={this.fetchData}>Fetch Protected Data</button>
-        <ul>
-          {this.state.data.map((data, i) => (
-            <li key={i}>{data}</li>
-          ))}
-        </ul>
-      </div>
+      <Layout logout={this.props.logout}>
+        <Route exact path='/' component={Home} />
+        <Route path='/fetch-data' component={FetchData} />
+        {/* <p>{JSON.stringify(this.props.claims)}</p> */}
+      </Layout>
     );
   }
 }

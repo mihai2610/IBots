@@ -62,23 +62,21 @@ def login():
         access_token = create_access_token(identity=username)
         return jsonify({'access_token': access_token}), 200
 
-    # user_password = users_passwords.get(username)
-    #
-    # if not user_password or password != user_password:
-    #     return jsonify({'msg': 'Bad username or password'}), 401
-    #
-    # access_token = create_access_token(identity=username)
-    #
-    # return jsonify({'access_token': access_token}), 200
-
 
 @app.route('/api/protected', methods=['GET'])
 @cross_origin()
 @jwt_required
 def protected():
     claims = get_jwt_claims()
+    result = []
+    summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"]
+    for summary in summaries:
+        result.append({
+            "temperatureC": "33",
+            "summary": summary,
+        })
     if claims.get('username') == 'admin':
-        return jsonify({'data': ['hi', 'it', 'works']}), 200
+        return jsonify({'data': result}), 200
     return jsonify({'msg': 'No access for you!'}), 400
 
 

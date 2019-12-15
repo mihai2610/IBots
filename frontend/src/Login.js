@@ -1,9 +1,11 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.css';
 
 class Login extends React.Component {
   state = {
     username: '',
-    password: ''
+    password: '',
+    error: undefined
   };
 
   handleLogin = e => {
@@ -19,10 +21,17 @@ class Login extends React.Component {
         password: this.state.password
       })
     })
-      .then(response => response.json())
+      .then(response => {
+        if (response.status !== 200) {
+          this.setState({ error: "Authentication failed!" });
+        }
+        return response.json()
+      })
       .then(json => {
         const accessToken = json.access_token;
-        this.props.onLogin(accessToken);
+        if (accessToken) {
+          this.props.onLogin(accessToken);
+        }
       })
       .catch(error => {
         this.props.onLoginError();
@@ -43,27 +52,30 @@ class Login extends React.Component {
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        Username:
-        <br />
-        <input
-          type="text"
-          name="username"
-          value={this.state.username}
-          onChange={this.handleUsernameChange}
-        />
-        <br />
-        Password:
-        <br />
-        <input
-          type="password"
-          name="password"
-          value={this.state.password}
-          onChange={this.handlePasswordChange}
-        />
-        <br />
-        <button onClick={this.handleLogin}>Login</button>
-      </form>
+      <div className="container" style={{ width: "500px", paddingTop: "100px" }}>
+        <form className="jumbotron">
+          <h3>Sign In</h3>
+          <p className="text-danger"> {this.state.error} </p>
+          <div className="form-group">
+            <label>Email address</label>
+
+            <input type="username" className="form-control" value={this.state.username}
+              onChange={this.handleUsernameChange} placeholder="username" />
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input type="password" className="form-control" placeholder="Enter password" name="password"
+              value={this.state.password}
+              onChange={this.handlePasswordChange} />
+          </div>
+
+          <button type="submit" className="btn btn-primary btn-block" onClick={this.handleLogin}>Submit</button>
+          <p className="forgot-password text-right">
+            Forgot <a href="#">password?</a>
+          </p>
+        </form>
+      </div>
     );
   }
 }

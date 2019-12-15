@@ -11,6 +11,7 @@ const getClaims = accessToken => {
 const withAuth = allowedRoles => {
   return WrappedComponent => {
     class Auth extends React.Component {
+      
       constructor(props) {
         super(props);
         const accessToken = window.localStorage.getItem('accessToken');
