@@ -30,6 +30,9 @@ users_claims: Dict[str, Dict[str, str]] = {
     }
 }
 
+from sentalyzer import processing
+
+print(processing.get_sentiment_aggregates('GOOG'))
 
 @jwt.user_claims_loader
 def add_claims_to_access_token(identity):

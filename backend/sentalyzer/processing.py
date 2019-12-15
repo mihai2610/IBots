@@ -1,11 +1,18 @@
 from nltk import download
-from assets import TICKERS
+from .assets import TICKERS
 import pandas as pd
-download('vader_lexicon')   
+#download('vader_lexicon')
+#download('stopwords')
+#download('punkt')
+
+import os
+
+path = os.path.dirname(os.path.abspath((__file__)))
+
 
 def get_sentiment_data(ticker, itemtype):
     
-    df = pd.read_csv(f'{itemtype}.csv',low_memory=False)
+    df = pd.read_csv(f'{path}\{itemtype}.csv',low_memory=False)
         
     columns = {'comments': 'body', 'submissions': 'selftext'}
     
