@@ -49,7 +49,7 @@ def get_sentiment_data(ticker, itemtype):
           [-3,-1.2, 0, 1.2 , 3],\
           right=True,\
           include_lowest=True,\
-          labels=['strongly negative', 'negative', 'positive', 'strongly positive'])
+          labels=['stronglynegative', 'negative', 'positive', 'stronglypositive'])
     
     return dict(sent_clasification.value_counts())
 
@@ -57,13 +57,13 @@ def get_sentiment_aggregates(ticker):
     com_results = get_sentiment_data(ticker, 'comments' )
     sub_results = get_sentiment_data(ticker, 'submissions' )
     
-    labels=['strongly negative', 'negative', 'positive', 'strongly positive']
+    labels=['stronglynegative', 'negative', 'positive', 'stronglypositive']
     aggregation = {}
     
     for key in labels:
         try:
-            aggregation[key] = com_results[key] + sub_results[key]
-        except e:
+            aggregation[key] = str(com_results[key] + sub_results[key])
+        except Exception as e:
             print(e)
 
     return aggregation

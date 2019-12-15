@@ -96,11 +96,31 @@ def ticker_by_id(id):
         "name": ticker.name,
         "description": ticker.description
     }
+    sentiment = processing.get_sentiment_aggregates(ticker.name)
+
+    if claims.get('username') == 'admin':
+        return jsonify({'data': result, 'sentiment': sentiment}), 200
+
+    return jsonify({'msg': 'No access for you!'}), 400
+
+
+@app.route('/api/sentiment/ticker/<id>', methods=['GET'])
+@cross_origin()
+@jwt_required
+def sentiment_ticker_by_id(id):
+    claims = get_jwt_claims()
+    ticker = Ticker.query.filter(Ticker.id == id).first()
+    sentiment = processing.get_sentiment_aggregates(ticker.name)
+
+    result = {
+        "id": ticker.id,
+        "name": ticker.name,
+        "description": ticker.description
+    }
     if claims.get('username') == 'admin':
         return jsonify({'data': result}), 200
 
     return jsonify({'msg': 'No access for you!'}), 400
-
 
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True

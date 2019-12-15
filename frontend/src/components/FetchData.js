@@ -1,12 +1,5 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom'
 import { Redirect } from 'react-router-dom'
-
-interface Ticker {
-  id: number,
-  name: string,
-  description: string
-}
 
 export class FetchData extends Component {
   static displayName = FetchData.name;
@@ -43,8 +36,6 @@ export class FetchData extends Component {
       )
       .catch(() => this.props.logout());
   };
-
-
 
   renderForecastsTable(tickers) {
     return (

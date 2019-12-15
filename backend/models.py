@@ -136,7 +136,10 @@ class Order(db.Model):
     ticker = db.Column(db.Integer, db.ForeignKey('ticker.id'))
     price = db.Column(db.Float())
     status = db.Column(Enum(OrderStatus))
+    quantity = db.Column(db.Integer)
+    side = db.Column(db.String(100))
     type = db.Column(Enum(OrderType))
+    time_inforce = db.Column(db.String(100))
 
 
 class Ticker(db.Model):
