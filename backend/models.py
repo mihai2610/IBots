@@ -26,6 +26,7 @@ class OrderStatus(enum.Enum):
     filled = 3
     cancelled = 4
 
+
 class OrderType(enum.Enum):
     market = 1
     limit = 2
@@ -62,11 +63,11 @@ class User(db.Model, UserMixin):
     displayname = db.Column(db.String(120), unique=True)
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(120))
+    amount = db.Column(db.Integer())
     roles = db.relationship('Role', secondary=ROLES_USERS,
                             backref=db.backref('users', lazy='dynamic'))
     orders = db.relationship('Order', secondary=ORDERS_USERS,
                              backref=db.backref('users', lazy='dynamic'))
-    profile = db.relationship('Profile', backref='user', lazy='dynamic')
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -128,15 +129,6 @@ class Role(db.Model):
 
     def __hash__(self):
         return hash(self.name)
-
-
-class Profile(db.Model):
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    amount = db.Column(db.Integer())
-    option1 = db.Column(db.Integer())
-
-
 
 
 class Order(db.Model):

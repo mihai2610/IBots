@@ -4,8 +4,8 @@ import datetime
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, prompt_bool
 
-from .core import app, db
-from .models import User, Role, Profile
+from core import app, db
+from models import User, Role
 
 manager = Manager(app)
 migrate = Migrate(app, db)
@@ -20,9 +20,8 @@ def create_admin():
     """
     if not User.query.filter(User.username == 'admin').first():
         admin_role = Role.query.filter(Role.name == 'Admin').first_or_404()
-        user_profile = Profile()
         userone = User(username="admin", displayname="Admin", email="admin@example.com",
-                       password="admin", roles=[admin_role], user_profile=user_profile,
+                       password="admin", roles=[admin_role],
                        confirmed=True, confirmed_on=datetime.datetime.utcnow())
         db.session.add(userone)
         db.session.commit()

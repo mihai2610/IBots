@@ -6,7 +6,7 @@ from flask_jwt_extended import (JWTManager, create_access_token,
 from flask_sqlalchemy import SQLAlchemy
 
 from core import app
-from models import User
+from models import User, Ticker
 from flask_login import login_user
 import os
 from flask_cors import cross_origin, CORS
@@ -66,20 +66,39 @@ def login():
         return jsonify({'access_token': access_token}), 200
 
 
+
 @app.route('/api/protected', methods=['GET'])
 @cross_origin()
 @jwt_required
 def protected():
     claims = get_jwt_claims()
     result = []
-    summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"]
-    for summary in summaries:
+    tickers = Ticker.query.all()
+    for ticker in tickers:
         result.append({
-            "temperatureC": "33",
-            "summary": summary,
+            "id": ticker.id,
+            "name": ticker.name,
+            "description": ticker.description
         })
     if claims.get('username') == 'admin':
         return jsonify({'data': result}), 200
+    return jsonify({'msg': 'No access for you!'}), 400
+
+
+@app.route('/api/ticker/<id>', methods=['GET'])
+@cross_origin()
+@jwt_required
+def ticker_by_id(id):
+    claims = get_jwt_claims()
+    ticker = Ticker.query.filter(Ticker.id == id).first()
+    result = {
+        "id": ticker.id,
+        "name": ticker.name,
+        "description": ticker.description
+    }
+    if claims.get('username') == 'admin':
+        return jsonify({'data': result}), 200
+
     return jsonify({'msg': 'No access for you!'}), 400
 
 
