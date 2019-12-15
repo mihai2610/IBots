@@ -8,6 +8,10 @@ ROLES_USERS = db.Table('roles_users',
                        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
                        db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
+ORDERS_USERS = db.Table('orders_users',
+                        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+                        db.Column('order_id', db.Integer(), db.ForeignKey('order.id')))
+
 
 class User(db.Model, UserMixin):
     """
@@ -20,6 +24,9 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(120))
     roles = db.relationship('Role', secondary=ROLES_USERS,
                             backref=db.backref('users', lazy='dynamic'))
+    orders = db.relationship('Ticker', secondary=ORDERS_USERS,
+                             backref=db.backref('users', lazy='dynamic'))
+    profile = db.relationship('Profile', backref='user', lazy='dynamic')
     confirmed = db.Column(db.Boolean, nullable=False, default=False)
     confirmed_on = db.Column(db.DateTime, nullable=True)
 
@@ -81,6 +88,29 @@ class Role(db.Model):
 
     def __hash__(self):
         return hash(self.name)
+
+
+class Profile(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    amount = db.Column(db.Integer())
+    option1 = db.Column(db.Integer())
+
+
+class Order(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    ticker = db.Column(db.Integer, db.ForeignKey('ticker.id'))
+    cost = db.Column(db.Integer)
+
+
+class Ticker(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+
+
+
+
 
 @event.listens_for(Role.__table__, 'after_create')
 def insert_initial_values(*args, **kwargs):  # pylint: disable=unused-argument
