@@ -31,7 +31,7 @@ Jinja2==2.10.3
 jupyter-client==5.3.4
 jupyter-core==4.6.1
 locket==0.2.0
-lxml==4.4.2
+lxml==4.6.5
 Mako==1.1.0
 MarkupSafe==1.1.1
 more-itertools==5.0.0
