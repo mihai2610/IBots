@@ -32,7 +32,7 @@ jupyter-client==5.3.4
 jupyter-core==4.6.1
 locket==0.2.0
 lxml==4.4.2
-Mako==1.1.0
+Mako==1.2.2
 MarkupSafe==1.1.1
 more-itertools==5.0.0
 ndg-httpsclient==0.5.1
